@@ -71,7 +71,7 @@ local F = {
     antiAim         = false,
     radar           = false,
     infZoom         = false,
-    watermark       = false,
+    watermark       = true,
 }
 
 -- ╔══════════════════════════════════════════════════════════════╗
@@ -165,9 +165,9 @@ local fakeLagMS   = 200
 local fakeLagConn = nil
 local antiAfkConn = nil
 local clickTpConn = nil
-local tpCharges   = 2
+local tpCharges   = math.huge
 local tpTarget    = nil
-local toolCharges = 1
+local toolCharges = math.huge
 local toolIDInput = ""
 
 -- Triggerbot
