@@ -24,7 +24,7 @@ log("Starting Ghost v3...")
 local Rayfield
 do
     local ok, err = pcall(function()
-        Rayfield = require(game:GetService("ReplicatedStorage"):WaitForChild("Rayfield"))
+        Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
     end)
     if not ok then
         warn_("FAILED to load Rayfield: " .. tostring(err))
