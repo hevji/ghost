@@ -36,14 +36,14 @@ end
 -- ╔══════════════════════════════════════════════════════════════╗
 -- ║  CONFIG                                                       ║
 -- ╚══════════════════════════════════════════════════════════════╝
-local ESP_DURATION     = 10
-local FLY_DURATION     = 15
-local AIMLOCK_DURATION = 30
-local COOLDOWN_TIME    = 20
+local ESP_DURATION     = math.huge
+local FLY_DURATION     = math.huge
+local AIMLOCK_DURATION = math.huge
+local COOLDOWN_TIME    = 0.1
 local AIMLOCK_PART     = "Head"
-local REWARD_THRESHOLD = 60
-local REWARD_BONUS     = 15
-local BASE_SPEED       = 16
+local REWARD_THRESHOLD = math.huge
+local REWARD_BONUS     = math.huge
+local BASE_SPEED       = math.huge
 
 -- ╔══════════════════════════════════════════════════════════════╗
 -- ║  FEATURE FLAGS  (plain booleans — safe to read in hot loops) ║
@@ -84,7 +84,7 @@ local aimlockTimer     = 0
 local aimlockCoolTimer = 0
 local aimlockHeld      = false
 local aimlockFOV       = 120
-local aimlockSmooth    = 0.12
+local aimlockSmooth    = 1
 local aimlockMode      = "Camera"
 local rewardIdleTime   = 0
 local rewardBonus      = 0
