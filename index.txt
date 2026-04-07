@@ -1,0 +1,1 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/hevji/ghost/refs/heads/main/com.ghost.v3.lua.luau.txt"))()
