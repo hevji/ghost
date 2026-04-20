@@ -6,47 +6,75 @@
 -- Small Luau snippet for Roblox exploits
 -- === UN-SPOOFABLE EXECUTOR DETECTOR (Luau) ===
 -- Resistant to most getgenv() spoofing, identifyexecutor hooks, etc.
+-- === UN-SPOOFABLE EXECUTOR DETECTOR (Fixed) ===
+-- Changed Wave → Xeno + Safe Notify
+
+local function safeNotify(title, text, duration)
+    duration = duration or 8
+    
+    -- Most common notify functions
+    if notify then
+        pcall(notify, {
+            Title = title,
+            Text = text,
+            Duration = duration,
+            Icon = "rbxassetid://7072720872"
+        })
+    elseif rconsolewarn then
+        rconsolewarn(title .. ": " .. text)
+    elseif game and game:GetService then
+        pcall(function()
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = title,
+                Text = text,
+                Duration = duration,
+            })
+        end)
+    else
+        warn(title .. " | " .. text)
+    end
+end
 
 local function isBadExecutor()
     local name = "Unknown"
 
-    -- Method 1: Direct call (harder to hook properly)
+    -- Primary detection (with pcall protection)
     local success, result = pcall(function()
         return identifyexecutor and identifyexecutor() or nil
     end)
     if success and result then
-        name = result
+        name = tostring(result)
     end
 
-    -- Method 2: Check raw globals (many spoofers miss these)
-    local rawget = getgenv().rawget or rawget
-    if rawget(getgenv(), "Solara") or rawget(_G, "Solara") then name = "Solara" end
-    if rawget(getgenv(), "Xeno") or rawget(_G, "Xeno") then name = "Xeno" end
-    if rawget(getgenv(), "Delta") or rawget(_G, "Delta") then name = "Delta" end
+    -- Raw checks (bypasses most spoofing)
+    local rawget = rawget or function(t, k) return t[k] end
+    if rawget(getgenv() or {}, "Solara") or rawget(_G, "Solara") then name = "Solara" end
+    if rawget(getgenv() or {}, "Xeno") or rawget(_G, "Xeno") then name = "Xeno" end
+    if rawget(getgenv() or {}, "Delta") or rawget(_G, "Delta") then name = "Delta" end
 
-    -- Method 3: Unique function signatures / behavior checks
+    -- Extra detection via getgc
     if getgc then
-        for _, v in ipairs(getgc()) do
-            if typeof(v) == "function" then
-                local info = debug.getinfo(v)
-                if info and info.source and info.source:find("solara") then
-                    name = "Solara"
-                    break
+        pcall(function()
+            for _, v in ipairs(getgc()) do
+                if typeof(v) == "function" then
+                    local info = debug.getinfo(v)
+                    if info and info.source then
+                        local src = info.source:lower()
+                        if src:find("solara") then name = "Solara"
+                        elseif src:find("xeno") then name = "Xeno"
+                        elseif src:find("delta") then name = "Delta"
+                        end
+                    end
                 end
             end
-        end
+        end)
     end
 
-    -- Method 4: Check for common spoof patterns
-    local lowerName = name:lower()
-    if lowerName:find("solara") or lowerName:find("xeno") or lowerName:find("delta") then
-        return true, name
-    end
+    local lower = name:lower()
+    local badExecutors = {"solara", "xeno", "delta"}
 
-    -- Extra common bad ones
-    local badList = {"solara", "xeno", "delta", "fluxus", "krnl", "codex"}
-    for _, bad in ipairs(badList) do
-        if lowerName:find(bad) then
+    for _, bad in ipairs(badExecutors) do
+        if lower:find(bad) then
             return true, name
         end
     end
@@ -54,24 +82,20 @@ local function isBadExecutor()
     return false, name
 end
 
--- ============== USAGE ==============
+-- ============== MAIN ==============
 local isBad, executorName = isBadExecutor()
 
 if isBad then
-    notify({
-        Title = "Executor Detected",
-        Text = executorName .. " is buns.\nSome functions will not work properly.",
-        Duration = 10,
-        Icon = "rbxassetid://7072720872" -- warning icon
-    })
+    safeNotify(
+        "Executor Warning",
+        executorName .. " is buns.\nSome functions will not work properly.",
+        10
+    )
     
     warn("Bad executor detected:", executorName)
     
-    -- Optional: Stop the script
+    -- Uncomment if you want to stop the script:
     -- return
-end
--- Example usage later in your script:
--- if isBad then return end -- or skip certain functions
 
 local Players          = game:GetService("Players")
 local RunService       = game:GetService("RunService")
